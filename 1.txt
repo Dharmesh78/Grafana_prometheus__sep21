@@ -1,0 +1,499 @@
+  
+ Linux - admin task 
+	 ----------
+	  ->start the service
+	  ->stop the service
+	  ->restart the service
+			-------
+			  |__daemon (system process)
+
+ winx ->service ->UI(start;stop)
+ 
+ shell-script
+ -------------
+	|__ commandline based activity 
+ 
+ yaml - config file
+
+ API - json + flask + webframework
+       ----   ===================
+ _________________________________________________________________________________________
+ 
+ OS - system software(program) - interface between user and H/W
+ |    core part of an os is called kernel
+ |
+ Linux - Kernel 
+ 
+ Linux abstractions are File,Process
+
+ File - data - under the storage device
+			 ---------------//(HD;USB)
+ process - data - under the CPU
+			    ----
+			     fetch ->register ->execute//process
+
+  User process				System process
+  -------------				---------------
+  -by user				-by systemD(or) init - PID=1
+  -pts/port				  OL[78] - systemD ; 
+
+  					->TTY:?
+  TTY:pts/port
+ 
+  - start ->R+ ->Exit 			start ->R+ (background) 
+	    ||   =====				
+	  Stop				- parent is systemD(or)init
+					session leader (SID)
+
+ P1  P2  P3   P4   P5   P6   P7   P8  P9  P10
+ 101 102 103  104  105  106  107  108 109 110 <= PIDs
+ 
+ P1 P2 P3	P4 P5	  P6 P7	    P8 P9 P10
+ ________	_____     _____     __________
+ PGID:101	PGID:104  PGID:106  PGID:108	
+ PID PGID
+ 101 101
+ 102 101
+ 
+ P1 P4 P6 P8
+ ____________
+ session (SID)
+ SID:101
+
+
+ - commandline			daemon process
+    |				|_parent is systemd (or) init
+   parent is working shell
+	(bash;sh;ksh)
+ 
+ OFF ->Switch ON ->POST ->MBR ->GRUB ->Kernel ->Process(systemD<or>init)
+						|
+						start the process - runlevel (daemon process)
+						|
+						getty(?)  - Login:_____
+							    passwd:____
+						|		|
+						shell(CLI)	Desktop(GUI)
+						|		|
+					User I/O		User I/O <== user process
+
+
+ root@host~]# mysql -u root -p ... {enter}
+ 	      _______________________________//user process
+ mysql>			|
+ mysql> ...		|
+			mysqld.service //system process
+			------
+			 |__ active (or) running state
+
+
+ ssh <remoteHost> //user process 
+ ------------------
+	|__ sshd.service 
+
+
+ root@host~]# <== shell primary prompt
+
+ root@host~]# command
+	      -------//process(userprocess) - by user; parent is working shell ...
+ 
+ ---------------------------------------------------------------------------------------------------
+ Linux
+ -----
+ root@host~]# ./appln <== user process
+ -----------     |
+ 		
+ user process -->system process
+		 _______________
+			|__systemd ctrl
+	 		   .......
+ 	 
+ systemctl {start|stop|restart|status} daemon.service
+
+ root@host~]# systemctl status crond 
+ 
+ systemctl status sshd (or) systemctl status sshd.service
+ systemctl status grafana-server
+ systemctl status mysqld
+ systemctl status influxdb
+ systemctl status prometheus-server
+
+ systemctl start grafana-server 
+ 
+ How to start my application(ex: shellscript) automatically during booting time?
+	(or)
+ How to convert myapplication - daemon ?
+		(userprocess)   (system-procesS)
+
+ step 1: create a unit file (or) service file 
+
+	 vi /etc/systemd/system/myab.service
+	 [Unit]
+	 Description=''
+
+	 [Service]
+ 	 ExecStart='myapplication path' (ex: /root/project/p1.sh)
+	 [Install]
+	 WantedBy='multiuser.target'
+		
+	:wq
+
+ step 2: reload a deamon -> systemctl deamon-reload
+
+ step 3: systemctl enable myab.service
+ 
+ step 4: systemctl start myab.service
+
+  
+ root@host~]# /root/project/p1.sh {enter}
+
+ root@host~]# ps -e|grep p1.sh {enter}
+ 	pts/0  -- p1.sh <== user process
+	
+	 ?   -- p1.sh <== system process (R+)
+ 
+     
+===========================================================================================
+  
+ /bin/fileA
+      ------
+	|_____________/etc/systemd/system/fileB.service
+					  --------------
+					   |
+					  ...
+					  ExecStart=/bin/fileA
+
+ systemctl start fileB
+	   stop fileB
+	   start fileB
+
+ /bin/cron
+
+ /etc/systemd/system/cron.service
+			|
+			/etc/sysconfig/cron <== env details
+					|_ this not a binary file; this is not a daemon(service)
+					|__ this is ordinary ASCII / TEXT
+ 
+	
+ ===========================================================================================
+ install packages
+ ----------------
+ rpm -ivh <PackageName>-version-release.arch.rpm <== file
+          --------------------------------------
+	
+ rpm -q <packagename>  (-q query - package is installed or not)
+
+ rpm -qa|grep <Package>
+ 
+ yum install <packageName> {enter}
+ y/d/n
+ 
+ apt-get install <packageName> 
+ ........................................................................
+  |
+  |___ systemctl start servicename
+ 
+
+ root@host~]# whatis <Command> - definition only
+ 
+ root@host~]# man command {Enter}
+ 
+ /searchkey
+
+ q (quit)
+ root@host~]# 
+
+ --------------------------------------------------------------------------------------------------
+ Grafana
+ --------
+
+  -> Grafana is an open source analytics and interactive visualization web application.
+ 
+ Devops life cycle
+ -------------------
+ CD -> CI ->CT ->CD ->CM ( continus monitoring / continuous ctrl monitoring)
+                      ....
+ 
+ alert
+ -----------------------------------------------------------------------------
+
+ grafana is not a storage unit
+ 
+ grafana is a visualization tool
+ 
+ grafana is multiplatform open source analytics and interactive visualization web application
+ 
+ grafana dashboards pull data from the plugged in data sources(ex: prometheus,influxdb,mysql,...)
+ 	 ----------
+	   |
+	 collection of panels
+
+ charts
+ graphs
+ alerts 
+ ====================================================================================================
+
+ in OL (or) RHL (or) centos (or) fedora linux 
+ -----------------------------------------------
+
+  yum install <packageName>
+	
+ ex: yum install python3
+     y/d/n
+
+
+ ex: yum -y install python3
+     ----
+	|
+	|
+	refer /etc/yum.repos.d/public-yum-ol7.repo
+			       --------------------
+				base_url: ....
+				
+        vi /etc/yum.repos.d/publi-yum-ol7.repo {enter} (or) vi /etc/yum.repos.d/filename.repo
+				
+
+
+	[  ]
+  	..
+	# add the following entries in the bottom
+
+	[grafana]
+	name=grafana
+	baseurl=https://packages.grafana.com/oss/rpm
+	repo_gpgcheck=1
+	enabled=1
+	gpgcheck=1
+	gpgkey=https://packages.grafana.com/gpg.key
+	sslverify=1
+	sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+	
+	:wq
+
+        
+ # in linux - redirection
+ # any command result ->write to file 
+ # command >resultfile
+		|
+		must be newfile
+
+ # command >>resultfile
+	   |
+	  append
+
+ echo "deb https://packages.grafana.com/enterprise/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+ 
+
+ ----------------------------------------------------------------------------------------
+ 
+ 127.0.0.1:3000 {Enter}
+
+ Login: admin
+
+ passwd: admin
+
+
+ new password:  
+
+ new password: .......
+
+ (skip)
+
+ -------------------------------------------------------------------------------------
+  panel - visualization block (building block) - editable
+
+
+  json 
+  ----
+   |->store & exchange
+
+  json - data only (there is no html tags )
+
+  1. Scalar Data (Single) - 12 13.44 'a' 'abc' true yes no false
+		  |
+		  |_ int float string bool nil 
+
+  2. Collection Data - Collection of scalars in single structure
+		 |
+		 |__ Array - index based [ ]  => [12,13.44,'a',true,nil]
+						  0   1     2   3    4 <== index
+
+		 |__ object - key:value based { }
+
+ 
+ JSON Array - Collection of different items(ordered) index based
+
+ JSON object - Collection of different items(unordered) key:value based 
+					     ..........
+
+		{"Key":Value} //data format
+		  |      |____value can duplicate
+		  |
+		 must be unique
+
+ Single dimensional struct
+ =========================== 
+  
+  ['name','color','X','Y',12.3,0.45,'on','off'] <== Array
+   
+
+  {"Key1": 'name',"Key2":'color','Key3':'X','Key4':'Y'} <== object(or)dict
+    -------------------------------------------------- 
+
+  Multidimensional struct
+  ==========================
+	
+  Array of Array -> [ [ ],[],[],[] ]
+
+  Array of object -> [ {},{},{},{} ]
+
+  object of Array -->{"Key":[ ],"K1":[ [],{} ]}
+
+   d={"K1":"V1","K2":["V2","V3"],"K3":{"Key1":"Value1"}}
+       --------  ----===== =====  ---  ===============
+
+   d={"K1":[[], {}  ]}
+	|   ==  ---
+        |   |    |---------->array of object
+	|  Array of Array
+	object of Array
+
+  object of object -->{"Key1":{"Key1":"V1","Key2":"V2","Key3":"V3"},"Key2":{"K1":"A","K2":"B"}}
+    			
+
+
+  d={"K1":[ [10,20,30],{"K1":"Red","K2":"Blue"}]}
+		      |
+		      |
+
+  d['K1'][0] ->[10,20,30]
+  d['K1'][0][0] -->10
+  
+  d['K1'][1] -> {"K1":"Red","K2":"Blue"}
+
+  d['K1'][1]['K1'] -->'Red'
+
+  d['K1'][1]['K2'] -->'Blue'
+
+  {
+  "id": 1,
+  "gridPos": {
+    "h": 3,
+    "w": 24,
+    "x": 0,
+    "y": 0
+  },
+  "type": "welcome",
+  "title": "Head",
+  "description": "sample title panel\nThis is sample title panel",
+  "links": [
+    {
+      "title": "Grafana Installation Page",
+      "url": "https://grafana.com/docs/grafana/latest/installation/rpm/",
+      "targetBlank": true
+    }
+  ],
+  "datasource": null
+}
+  
+   
+ =================================================================================================
+  +  <=== create a new dashboard;folder;import external db
+
+ 
+ create a new dashboard  
+	      ----------
+		|
+	       (collection of panels)
+				|
+			      Visualization block
+
+
+     
+  	step 1: data source
+	step 2: panel
+		 |
+		Queries  - queries are how grafana panels communicate with datasource to get data
+			   for the visualization
+
+		  -> query executed by data source(DataBase)
+
+  
+=====================================================================================================
+ Time series
+ -----------
+  -> sequence of value (or) value of variables (ex: temperature, hourly)
+  		 -----
+		 |__ discrete-time data
+
+	2021-09-27 10:13:20 p1.log  
+	2021-09-27 11:13:20 p2.log
+	...
+	
+	Time series analysis
+		
+	Regression analysis
+
+
+   -> Time Series DataBase (TSDB)
+     
+		->data base type //timestamped data
+				   ------------
+					|_ Handling metrics
+						    --------
+						 	|__measurement of system resources(CPU,Fs..)
+
+	
+	
+   ->influxdb
+     ========
+	
+
+	TSDB -> X - time  
+		Y - value(int,float,str,bool)
+
+    Label
+    ------
+	|-> measurement - grouping all of the data 
+
+    legend(metadata)
+    -----------------
+	|_index 
+     tags - single piece of meta data
+ 
+
+  install influx db
+  ------------------
+    ->download influxdb
+    ->start a damon ->influxdb-server
+     client influxdb
+
+    open influxdb cli
+    --------------------
+
+    # creating data base
+    create database <DBNAME>
+    
+    insert <measurement>,tag=value...
+ 		
+    insert cpu,host=server1,location=us-west value=10
+	
+    
+  
+==========================================================================================================
+
+
+ Grafana dashboard
+ ----------------------
+
+ step 1 : Data source(DB) ; Note: DB(daemon) is active(running) state
+	
+	 settings -> datasources ->add datasource ->Test
+
+ step 2: dashboard ->panel ->(default grafana - random..)
+			|
+			Query - select datasource - infludb-1
+						  				
+			
+ ------------------------------------------------------------------------------------------------------

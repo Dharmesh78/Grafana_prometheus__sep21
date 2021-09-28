@@ -1,0 +1,252 @@
+ 
+ Recap
+ -----
+ Linux - abstraction, about service file/unit file
+	 install software packages
+	 yum Vs apt-get 
+	
+ |
+ Grafana - visualization tool 
+	 
+	   Dashboard - collection panel
+				   |_ visualization block
+
+	  ->each visualization(timeseries,graph,stat..) - some set of attributes
+	    all attributes are dynamically changeable 
+
+	  -> JSON - data only format
+
+	
+  CGI - appln
+
+  Login.html
+  ----------
+  Emp ID:|____|
+   (submit)	--------->---webserver-----> .....
+ 				
+  Emp name:Mr.ABC				 |
+  Emp cost:3234.33    <-------------------------
+  Emp dept:sales	<html>
+			<head>
+			<...>
+			<p><h1>Emp name:Mr.ABC</h1></p>
+			...
+			</html>
+		
+
+  		Vs
+
+			'Mr.ABC'
+			3234.33
+			'sales'
+			-------//dataonly - there is no html tags
+				  |
+				store & exchange data between webservices
+				
+	 in grafana using json - exchange dashboard 
+			       - import external dashboard
+	
+	 all grafana visualization - attributes(or)properties // dynamically changes
+					|
+					override
+
+   default grafana -> visualization
+
+  -> infludb -->add data source --> Dashboard
+_______________________________________________________________________________________________________
+
+ create a default panel 
+		|
+		visualization(ex: timeseries)
+		|
+		duplicate this panel ->[  ] //change the visualization
+		
+ ------------------------------------------------------------------------------------------------------
+
+
+ measurement -- table
+  |
+  tag - key/value  -- row
+  -------------------------
+
+ insert <Measurement Name>,Key1=Value1 Key2=Value Key3=Value....fieldName=value
+
+ insert cpu,host=server1,location=india value=121
+  
+------------------------------------------------------------------------------------------------------
+ Timeseries Data
+ ------------------
+	-> sequence of data points
+		       -----------
+			|_successive measurements
+				     ---------------
+					|_from data source over a time interval
+
+	-> plot the points on a graph
+	-> data(value) - measured in always in time	
+					      ------
+
+   Regular time series		Vs		irregular time series
+   ------------------				--------------------
+  measurements are 				 // events 
+  gathered at regular
+  time intervals
+  (Metrics)			
+  ..........//label->{key:value}
+
+ Devops - track severs,VMs,appln
+ Realtime
+
+ X - time
+ Y - value
+
+ 
+ 
+ measurement -- table
+  |
+  tag - key/value  -- row
+  -------------------------
+
+ insert <Measurement Name>,Key1=Value1 Key2=Value Key3=Value....fieldName=value
+
+ insert cpu,host=server1,location=india value=121
+  
+-
+ Query format
+ --------------
+ measurement,tagset,fieldset timestamp
+			     ^^^^^^^^^^
+				|-->automatically generated
+				|-->index 
+ stock_price,market=ABC price=1233.44 
+ ........................................
+						
+ 
+ select field(sum(total)) from <measurement>
+		|
+	      avg()
+	    
+ where time > '2021-05-01' and time < '2021-08-31'
+
+ 
+ ex: python
+     |
+    DB-API()
+    |
+    create db
+    create table(measurement)
+	   fields
+	   value
+	  ---------//json format
+
+    ....
+     |
+    Grafana - query panel
+ 
+=======================================================================================================
+
+ variable
+ --------
+ placeholder - holding value
+ 
+ settings -> variables ->add variable
+			 --------------
+			
+
+ rowpanel ->we can add more panel in single row
+		       ----------
+			 |
+			 |
+			different data source
+        ROW1
+	[ panel1]	[panel2]	[panel3]	[panel4]
+	  |		 |		  |		  |
+	 influxdb	oracle		prometheus	  mysql
+	  |		 |		  |		   |
+    where value>50       - 		  -		  where location = 'india'
+			
+			Vs
+
+ variables - namespace - holding a value
+				   ------
+				     |->based on the type(ex: custome,query->DataSource
+										|_write a query)
+	
+  variable : [  query result ]
+		|
+		|
+		[  ]
+
+ ------------------------------------------------------------------------------------------------
+ annotations
+ -----------
+   -> mark points on the graph with events
+				    .......
+   ->They are visualized as vertical lines and icons on all graph panels.
+
+   -> Grafana annotations are for users who want to make notes directly 
+   onto the graphs in their dashboards.
+
+  
+  
+    -> db -> mem_usage
+		     -> swp res  sha
+			
+ time 
+ |
+ |
+ graph
+ |_ alret - threshould
+ |_ variable
+ |_ annotation 
+	     |__ data_point
+	     |__ query annotation
+
+ -------------------------------------------
+	|
+	json
+
+  ^pattern  -->matches pattern line starts with
+
+  pattern$  -->matched pattern line ends with
+
+  ^pattern$ -->pattern only
+  --------------------------
+	|__ grafana variable/value
+	
+	variable=value
+	|
+	^$variable$
+	 ---------
+
+	=~ <== match operator
+	!~ <== not-match operator
+	----------------------------//regx operators
+
+
+
+	/^$variable$/
+
+ -------------------------------------------------------------------------------------------------
+
+ 
+  
+    -> db -> mem_usage
+		     -> swp res  sha
+			
+ time 
+ |
+ |
+ graph
+ |_ alret - threshould
+ |_ variable
+ |_ annotation 
+	     |__ data_point
+	     |__ query annotation
+
+ 
+  ->DB -->..... <==== datasource 
+			|_ visualization
+			|_ alert
+ 
+=======================================================================================================
