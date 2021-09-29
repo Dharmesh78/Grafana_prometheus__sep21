@@ -1,0 +1,776 @@
+  Recap
+  ------
+  grafana - visualization 
+		->property/attributes
+		->json
+		  ----//mutable(chanageable)
+
+		->data source(influxdb)
+		->panel-visualization block
+		->multiple panels - row
+		->annotation - datapoint - notes
+		->variables - to view dynamic value
+		->Query panel
+			->query editor
+			->SQL
+		-> alert -> Graph 
+		     |
+		     ->alert notification
+		-> Query - Explore
+
+		->import json file(dashboard) 
+		->create a new folder / move
+		->manges - folder/dashboard
+		->link
+		  ----
+		    ->panel link (external url) 
+		    ->data link (click - panel) ->new page will open
+		-> Dashboard -> <iframe=....>
+					 |
+					share ->link ->copy URL(grafana URL)
+				
+		->grafana-cli - plugin
+
+	 -> grafana is not storing any data (or) logs - it's not a data source
+		|
+		Visualization tool
+  -------------------------------------------------------------------------------------------------
+			
+  Prometheus 
+  -----------
+	 |->open source system monitoring and alter tool kit
+	 |->timeseries database
+	 |https://prometheus.io/docs/introduction/overview/
+
+
+  [ node1 ]	[node2]	[node3]
+	|	  |	  |
+ 
+	---------------------
+	 | 	|	 |
+	 |	|	 |
+	 |      |	 |pull
+	 |____	|__	-----------------------------
+	   pull pull	prometheus - monitor - node[123]
+			---------------------
+			 Main_Server
+
+
+	 |-> monitoring targets. (servers;db;vm;appln)
+	 |
+	 |-> prometheus will periodically scrap system metrics
+
+
+    Terms
+    ------
+	 |->metrics - system info (cpu;filesystem;fs mount point;memory;storage)
+	 |->label - key=value data
+	 |->instance(or) exporters - remote system/vms/db
+
+	 |->prometheus expects to retrueve metrics via HTTP calls
+
+	 https://<remotehost>:<portNumber>/metrics
+ 	
+	 |-> pull data from targets
+
+	  
+
+  metricname  label		sample/value
+  |		|
+  |		|
+ Tempeature location=place  	90
+	     ------- =====	---
+		Key   Value	  |-->actual data
+
+ CPU	core=1		15
+  |	------- 	----//actual data
+  |	key value
+  |     --------//label
+ metricname
+
+
+ App
+ ---
+  |->multiprocessing - code - execute each cpu core
+ ----					   --------
+		CPU core=1  15
+		CPU core=2  24
+		CPU core=3  5
+		CPU core=4  0
+ 
+  -> it is written in Go
+ 
+  ===============================================================
+		
+  prometheus
+  metrics
+  node exporter
+  data visualization
+  alert manager
+  service discovery
+  internals
+ ================================================================================================
+   prometheus config files are yml (or) yaml format
+   
+   install a package 
+   configure
+   service file
+   reload daemon
+   start the service
+   -------------------//manual step -->automatic way -->shellscript
+
+
+ __________________________________________________________________________________________________
+
+ shellscript - command based language
+
+ root@host~]# command1
+ root@host~]# command2
+ root@host~]# command3
+
+ root@host~]# vi p1{enter}
+ command1
+ command2
+ command3
+ :wq
+ root@host~]# chmod a+x p1 {Enter} (or) chmod 777 p1
+ root@host~]# ./p1
+ command1-result
+ command2-result
+ command3-result
+
+ root@host~]#
+
+ Example
+ -------
+ install alertmanager -> yum install packageName
+					|	
+					not exists in /etc/yum.repos.d/public...repo
+					----------
+					   |-->add base url then install package
+
+		 # add base_url of alertmanager
+		 # yum install <packagename>
+		 #
+		 #
+ create a config file -> filename.yml
+			 ...
+			 ...
+ create a unit file -->  filename.service
+			[  ]
+			[  ]
+ update this package config to prometheus ( prometheus_config file)
+ start prometheus config
+ reload filename.service
+ start alertmanger.service
+ ....
+ ======================================================================================================
+
+ shellscript - dynamic type language
+
+ variable=value <== to assign value dynamically
+
+ IP="10.20.30.40"
+
+ IP="host01" <== exisiting value(10.20.30.40) will overwrite
+ 
+ server="Linux"
+ ------  ======
+   |	    |__value
+  variable
+
+  echo "My working kernel name:server" ->My working kernel name:server
+
+  echo "My working kernel name:$server" ->My working kernel name:Linux
+			       -------
+	
+     (or)
+  echo "My working kernel name:${server}" ->My working kernel name:Linux
+
+   version=1.45
+	|
+	|
+	${version} (or) $version
+
+ 
+ 1. collect - login name 
+	      kernel
+	      hostname
+    ->create write it into file
+
+ 2. create a directory
+ 3. copy file into directory
+ 4. Goto directory
+ 5. display file details (ls)
+ 6. after 5 secs delay
+ 7. read the file content
+ 8. display current working directory
+ 8. go to login dir
+ 9. delete the directory
+ 10. display current working directory
+ 
+ ---------------------------------------------------------------
+
+ yaml
+ ----
+  |->array and object
+      |		 |
+    index	 key:value
+
+ [d1,d2,d3,d4]  {"key":<space>value}
+ --------------
+    (or)
+
+  -<space>d1
+  -<space>d2
+  -<space>d3
+  -<space>d4
+  -----------//array elements
+
+  <S> - single space
+
+  d={"Key1":<S>Value,"Key2":<S>['D1','d2','D3'],"Key3":<S>{"K1":<S>"V1","K2":<S>"V2"}}
+     ------    ====== -----    ================  ----     ===========================
+
+  Key1:<S>Value
+  Key2:
+  -<S>D1
+  -<S>D2
+  -<S>D3
+  -<S>D4
+  Key3:
+  -<S>K1:<S>V1
+  -<S>K2:<S>V2
+
+ object of an array of object
+ ------------------
+		-------------
+
+ {"Key":<S>Value} - single dimensional 
+
+ {"Key":<S>[  ]} - Multidimensional
+	   ____
+	    |
+          ["V1",["V2","V3"],{"K1":"V1"}]
+	    |   ----------- ===========
+	    |       |          |
+        	
+ {"Key1": [ {"K1": "V1"},{"K2": "V2"} ]}
+   ----   |-------------|-----------|
+
+  Key1:
+  - K1: V1
+  - K2: V2
+ -----------//object of an array of object
+
+
+
+ templates:
+ - /etc/alertmanager/file1.yml
+ - /etc/alertmanager/file2.yml
+
+ object of array --> templates: ['/etc/alertmanager/file1.yml','/etc/alertmanager/file2.yml']
+ 
+ 
+ filename -> filename.yml (or) filename.yaml
+ --------------------------------------------
+ 
+ ---
+
+ ...
+ 
+yaml file format ->key: value pair
+------------------------------------
+
+
+ key_name:
+ - name: NAME OF THE ACTION/PLAY
+   Key:
+   - KEY1: Value
+   - KEY2: Value
+
+ 
+ root@host~]# yum install httpd <== Linux command - commandline
+
+ root@host~]# ad-hoc command
+	      _______________
+		|
+	 ansible ...  -m yum -a "name=httpd state=installed" <== ansible ad-hoc
+		      ______________________________________
+				|
+			
+	 		modulename	
+		 	- name: NAME OF THE PLAY
+			  args1: value
+			  args2: value
+
+			yum:
+			- name: Installing webserver
+			  name: httpd
+			  state: installed
+			 ------------------//yaml format 
+			
+			command:
+			- name: execute cpu loadbalance
+			  args: ....
+
+===================================================================================================
+
+   
+    [  Linux - prometheus ]
+	 
+  run 1-install.sh 
+ 
+  ./1-install.sh 
+  ----------------
+	 -> installing prometheus
+	 -> create a prometheus config file
+	 -> create a prometheus service file (or) unit file
+	 -> reload daemon
+	 -> enable prometheus service
+	 -> start prometheus daemon
+ 	 
+  open a broswer -> 127.0.0.1:9090
+		    ---------------
+			|
+			refer from prometheus.yml file
+				   --------------
+		
+
+
+
+ 
+    Terms
+    ------
+	 |->metrics - system info (cpu;filesystem;fs mount point;memory;storage)
+	 |->label - key=value data
+	 |->instance(or) exporters - remote system/vms/db
+
+	 |->prometheus expects to retrueve metrics via HTTP calls
+
+	 https://<remotehost>:<portNumber>/metrics - to get list of all the metrics from remote system
+ 	
+	 |-> pull data from targets
+
+	  
+
+  metricname  label		sample/value
+  |		|
+  |		|
+ Tempeature location=place  	90
+	     ------- =====	---
+		Key   Value	  |-->actual data
+
+ CPU	core=1		15
+  |	------- 	----//actual data
+  |	key value
+  |     --------//label
+ metricname		
+			       key	value	       key	value
+				|	  |	       |	|
+ process_cpu_seconds_total{instance="localhost:9090", job="prometheus"}  1.1232072
+ ------------------------- ===========================================	 ___________
+    |						|				|_actual data
+  metric name					label
+
+ <RemoteIP>:<port>/metrics
+  |
+  |
+ CPU	{core=1}  15
+ CPU	{core=2}  45
+ CPU	{core=3}  34
+ ---
+  
+ process_cpu_seconds_total{instance="localhost:9090", job="prometheus"}  1.1232072
+
+ process_cpu_seconds_total{instance="remoteIP:<PORT>", job="prometheus"}  2.1232072
+  
+ process_cpu_seconds_total{instance="remoteIP:<PORT>", job="prometheus"}  0.0232072
+ _________________________ ============================================   _________
+	|				|					|_Actual value
+	|				Label
+	metric name
+ 
+
+ 
+ process_cpu_seconds_total{instance="localhost:9090", job="prometheus"}  1.1232072 
+
+  -> prometheus is not store raw data (or) plain text data - it stores metrics aggregated time
+  -> all the data stores in time series
+  -> everytime series is identified by the metric name and set of key=value(label)pairs
+ 
+  -> the time series data also consits of actual data(samples) along with time
+	(ex: influxdb cpu host=server1 value=10)
+		     <timestamp> ... .... ...
+    ex: actual data ->float type (float 64)
+  
+ -------------------------------------------------------------------------------------------------
+ metric types
+ ------------
+  ->1.counter 
+  ->2.Gauges
+  ->3.Histogram - buckets (addtional info) ex: request durations / response size/counters
+  ->4.Summeries 
+
+ -----------------------------------------------------------------
+
+ job 
+ instance
+ ------------------------------------------------------------------
+ PromQL
+ -------
+ like influxDB -> influxQL
+
+ in prometheus ->PromQL
+
+ PromQL
+
+
+ =~
+ !~
+ ----//Regx operators - we can use .* (wild cards)
+
+ ==
+ !=
+ ----//relational operators - we can't use wild cards
+  |
+  |
+ == != < > <= >=  - we can use value only not regx chars
+
+ Key <operators>  Value
+      
+ 
+ prometheus_http_requests_total{job =~ ".*etheus"}[5m]
+
+
+  in Regx (=~ !~)
+  ---------
+  .(dot) - any single char except \n
+
+  prometheus_http_requests_total{code =~ "3.."}
+					  ---
+					    |--> 3 followed by any two chars
+
+  .* - list of all
+ 
+  pattern1|pattern2|pattern3|...|patternN --any one pattern is matched ; anywhere;any order ->True
+
+  go_memstats_alloc_bytes_total{instance =~ "localhost:9090|10.20.30.40:9190|host01:9100"} 
+
+  
+ sum(rate(prometheus_http_requests_total[5m])) by(job)
+
+ avg by (instance)(irate(process_cpu_seconds_total{job="prometheus"}[6m])*100)
+
+ ---------------------------------------------------------------------------------------------------
+
+ https://drive.google.com/file/d/1zaTk102OAxVUy60Rz0s-STRX6JNXZyw4/view?usp=sharing
+
+https://drive.google.com/file/d/1Xus6VsN4a1TsdzfefkjvhKm60lp-UrCX/view?usp=sharing
+
+https://drive.google.com/file/d/1PK7eMupDOfNFIef7gTSCchIIYzBtMEp5/view?usp=sharing
+
+
+ install oracle virtual box 
+	 -------------------
+
+ download mydrive file (ex: OL7)
+ download file(ex: ubuntu)
+
+ |__ unzip file ->open a folder -> open virtualBox Machine definition 
+
+ --------------------------------------------------------------------------------------------------
+
+
+ node exporter
+ --------------
+ our labsetup
+
+
+
+
+ VirtualBox
+ ----------
+ [OL7] - user: root  ==> password:  apelix
+
+ [Ubuntu] - prometheus - running 
+  ------
+     |--> user:root ==>password: apelix
+     |--> ............ password: apelix
+
+
+  Network settings
+  ----------------
+
+  [OL7]  <------------->[Ubuntu]
+ 
+  [node] <------------->[Ubuntu] 
+
+  [Winx] <------------->[Ubuntu]
+		
+			Linux OS
+			---------
+			/etc/sysconfig/network-scripts/ifcf-<INTERFACENAME>
+
+			ex: /etc/sysconfig/network-scripts/ifcfg-eth0
+				...
+			ex: /etc/hosts - remoteIP<--->FQDN<-->Alias
+			
+			   vi /etc/hosts {Enter}
+	
+			  OL7IP   FQDN   alias
+			   :wq
+			   systemctl restart networking (or) network
+								|_OL7/RHL7
+
+			   ping OLIP (or) ping OL7FQDN (or) ping OL7alias
+
+			   press ctrl+c
+			
+			  ex: ssh OL7hostname{enter}
+				...
+				...
+		
+  ---------------------------------------------------------------------------------------	  
+  node_Exporter
+
+  download node_exporter
+  
+  install node_exporter
+
+  create a user
+  node_exporter binary file 
+   |
+   |
+  create a node_exporter service file
+	[Unit]
+	
+	[Service]
+
+	[Install]
+	
+  reload the daemon
+  start node_exporter
+  enable node_exporter # automatically start at booting time
+  node_exporter -->service (daemon)
+  |
+  |
+  prometheus.yml
+
+  static_configs:
+   - target:['localhost:9090','remote-host:<PORTNUMBER>']	  				  
+
+ # 2-node-exporter.sh
+
+ ##############################################################################################
+
+ ex: Linux 
+
+ [node1]
+
+
+
+
+ [myserver - prometheus] ->localhost:9090/metrics
+  ---------------------------------------------
+
+
+ on node1 (machine)
+ --------------------
+ step-1:download node_exporter.zip file from prometheus URL
+ step-2:unpack the zip/tar file
+ step-3:change the directory(ex: cd node_exporter)
+ step-4:move the node_exporter binary file to /usr/local/bin
+        (ex: mv node_exporter-0.16.0.linux-amd64/node_exporter /usr/local/bin)
+	
+ step-5 create a custom service file for node_exporter
+	vi /etc/systemd/system/node_exporter.service
+	[Unit]
+	Description=Node_exporter
+	After=network.target
+	
+	[Service]
+	ExecStart=/usr/local/bin
+	
+	[Install]
+	WantedBy=multi-user.target
+	:wq
+	
+ step-6: reload daemon 
+	 systemctl daemon-reload
+	
+ step-7: systemctl enable node_exporter # while booting time automatically node_exporter will start
+ step-8: systemctl start node_exporter
+ step-9: systemctl status node_exporter
+ --------------------------------------------------------------------------
+
+ prometheus server m/c (ex: ubuntu)
+ ------------------------------------
+ step 1: vi /etc/prometheus/prometheus.yml
+	
+	 - static_configs:
+	   - targets: ['localhost:9090','<REMOTEIP>:9100']
+		
+	:wq
+
+ step 2: restart daemon -> systemctl restart prometheus
+
+ step 3: open a broswer -><remoteIP>:9100/metrics
+                      ............
+	
+ step 4: display list of targets 
+	 open a broswer ->127.0.0.1:9090/targets
+
+ step 5: query
+
+	node_..... //external target system 
+			|
+			label -instance=______?
+ ----------------------------------------------------------------------------
+ 
+  recap - prometheus will periodically scrap system metrics
+  -----
+  add node_exporter entries in prometheus.yml file 
+  in below format (yaml format)
+
+  - job_name: '<NAME JOB>'
+    scrape_interval: 5s
+    static_configs:
+    <>- targets: ['remoteIP:9100']
+
+  :wq 
+  systemctl restart prometheus
+  
+  open a browser -> 127.0.0.1:9090/targets
+  ------------------------------------------------------------------------------------------------------
+ 
+  [node1] [node2] [node3(winx)]
+		  --------------
+			|
+			|
+		    - job_name: 'wmi_exporter'
+		      scrape_interval: 3s
+	              static_configs:
+           	      - targets: ['winIP:9182']
+		    :wq
+
+ 
+		  wmi_logical_disk_free_....
+
+		  C:	D:	E:
+   -------------------------------------------------------------------------------------------------
+
+  prometheus monitoring
+  -----------------------
+ 1.Querying - promQL
+ 2.Exporters
+ 3.Client libs 
+ 4. Pushing metrics
+ 5. Service Discovery
+ 
+ +-------------+
+ |  App(web)   | ->portN
+ +-------------+
+	|
+     [ prometheus:8000 ] <== API()
+	|
+   ---------------------------
+	[ prometheus :9090]
+   
+   ----------------
+   [Application:5000]
+   [prometheus:8000]
+   ----------------
+	|
+	|______ prometheus:9090
+
+ -------------------------------------------------------------------------------------------
+   
+ Flask - MVT - webframework
+  |
+  
+  flask + sqlite3 + jinja + python
+ ------------------------------------//appln - 5000
+
+
+
+
+  docker 
+  ------------
+  curl localhost:5000
+   .....
+  curl localhost:5000/query
+  
+  curl localhost:5000/sleep
+
+  curl localhost:8000
+  curl localhost:5000
+   .....
+  curl localhost:5000/query
+  
+  curl localhost:5000/sleep
+  ...
+
+   mysql_query_latency_seconds_sum[5m]
+   flask  ...
+   rate(mysql_query_latency_seconds_sum[5m])
+
+   switch to terminal
+   
+  curl localhost:5000/query
+  
+  curl localhost:5000/sleep
+
+  curl localhost:8000
+  mysql_query_latency_seconds_sum[5m]
+  flask  ...
+  rate(mysql_query_latency_seconds_sum[5m])
+
+ -----------------------------------------------------------------------------------------------
+ Prometheus Client Implementation  - STEPS
+ ++++++++++++++++++++++++++++++++++++++++++
+ 
+  step 1: cd prometheus-course {Enter}
+  step 2: cd flask-prometheus{Enter}
+  step 3: review main.py file - package file is __init__.py file --> flask_prometheus/__init__.py file
+  step 4: review docker file (Dockerfile)  (docker-compose.yml) 
+  step 5: # to install docker
+  	  cd scripts/
+	  ./install-docker.sh
+        
+  step 6: cd ../flask-prometheus
+  step 7: docker-compose up -d{enter}
+  step 8: docker ps -a{Enter}
+  step 9: curl localhost:5000{Enter}
+        Flask is up & running
+  step 10: curl localhost:5000/query {Enter}
+		..
+  step 11: curl localhost:5000/sleep {Enter}  
+  step 12: curl localhost:8000{enter}
+  
+  Repeat step 9,10,11
+  
+  step 13: go to scripts directory -> cd scripts
+  step 14: run add-flask-app.sh  -> ./add-flask-app.sh {Enter}
+  step 15: open a broswer -> 127.0.0.1:9090/targets
+    		targets
+		|
+		Flask app is running 
+  step 16: goto query -> type in query -> mysql_query_latency_seconds_sum {Enter}
+					 rate(mysql_query_latency_seconds_sum)[5m] {Enter}
+		
+				
+   Repeat step 10,11,12 then run query
+  step 10: curl localhost:5000/query {Enter}
+		..
+  step 11: curl localhost:5000/sleep {Enter}  
+  step 12: curl localhost:8000{enter}
+
+  
+  step 16: goto query -> type in query -> mysql_query_latency_seconds_sum {Enter}
+					 rate(mysql_query_latency_seconds_sum)[5m] {Enter}
+   
+  step 17: docker-compose down
+   ..................................................................................
+
+  
