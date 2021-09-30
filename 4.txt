@@ -1,0 +1,382 @@
+ Recap - prometheus
+ ------------------
+
+  ->install prometheus
+  ->created unit file (or) service file //act as a daemon
+  ->created config file /etc/prometheus/prometheus.yml
+			-------------------------------
+			
+ 			->include targets
+
+ -> started prometheus daemon
+ -> promQL -> executed query 
+     |
+    metric struct
+
+    metricName  Label   value
+	       ------
+	 	{Key=Value}
+
+
+  -> 127.0.0.1:9090/metrics
+
+
+  -> node_exporter
+  	|
+	|_install on target system; create customized service file(or) unit file
+	
+    ->node_exporter is active state
+
+     ->updated target system IP:portnumber /etc/prometheus/prometheus.yml
+      
+   ->restart prometheus 
+
+   ->prometheus ->targets -> localhost
+			     remotehost 
+     
+    +--------------+
+    | API 
+    |  |
+    | prometheus:8000
+    |---------------
+	|
+	prometheus:9090
+	|
+	...
+    |---------------------|
+ =====================================================================================================
+
+ alertmanager
+
+ 
+		     pullmetric
+    [prometheus]   -----<------ [ prometheus server ] ubuntu 
+	target  			| alert
+				        |
+				       \|/
+       OL7			[ Alert Manager ]
+					|
+					mail,slack
+
+   Alertmanager is a binary - handles the alerts sent by prometheus server and notifies end user
+   through email,slack ..
+
+   1. setup and configure alertmanager
+   2. config on prometheus file
+   3. create a alert rules in prometheus configuration
+   ---
+   4. define alert mech in alertmanager to send alerts mail,slack..
+
+  
+  alertmanager.service (daemon) - (1)
+  |
+  /etc/alertmanager/alermanger.yml
+			|
+			| (4) - define alert mech in alertmanager to send alerts mail,slack
+			
+
+  1. setup and configure alertmanager
+  --------------------------------------
+  ./4th script.sh
+
+  => download alertmanager 
+  => copy binary to /usr/local/bin
+  => auth
+  => created unit file
+  => started daemon ( alertmanager.service)
+
+  to define alert mech in alertmanager
+  vi /etc/alertmanager/alertmanager.yml
+   
+  ...
+  :wq
+
+  2. config prometheus file
+    
+    append following  lines in /etc/prometheus/prometheus.yml 
+    alerting:
+      - alertmanagers:
+	- static_configs:
+	  - targets: ['localhost:9093']
+  
+ systemctl restart alertmanger
+ systemctl restart prometheus
+
+  
+ 3. create a alert rules in prometheus configuration
+             -----------
+		|
+		condition based yml file
+		---------------
+		 == != =~ !~ < > 
+
+	
+   recap yml file
+   ----------------
+   module:
+   - name: <NAME OF THE ACTION>
+     module:
+     - name: <PLAY1>
+       args: ...
+     module:
+     - args:...
+
+  alert_rules
+  -------------
+  groups:
+  - name: <NAME OF THE ALERT> # optional
+    rules:
+    - name: <NAME OF THE RULE> # optional
+      alert: <NAME OF THE ALERT> # user defined
+      expr: promQL (condition based)
+      for: 1m
+      labels:
+	severity: critical
+        ------------------//argument of labels
+      annotations:
+        summary: <USER DEFINED MESSAGE>
+   ----------------------------------------------------
+	|__ /etc/prometheus/alert.rules 
+	    ----------------------------
+			|-->update this file entry into prometheus config(prometheus.yml)
+
+	 	  
+  127.0.0.1:9093
+ --------------------
+	alerts ->...
+
+ --------------------
+     
+ =================================================================================================
+ promQL
+
+ {instance=10.0.2.4  job=.... idle=13.45 nice=16.42}
+  --------	     ---       ---
+   $labels.keyname
+
+   {{$labels.instance}} <== template syntax
+
+ 
+  <html>
+  ..
+  <p> CPU Utilization:{{variable}} </p>
+  ..
+ </html>
+
+  CPU Utilization:
+		  ______
+ ---------------------------------------------------------------------------------------
+
+ Alert demo - slack 
+ --------------------
+
+ cd scripts {Enter}
+
+ cat 4,5th script
+ 
+ slack demo
+  -------
+ vi /etc/alertmanager/alertmanager.yml {Enter}
+
+ global
+    ...
+    ....
+    send_resolved: true
+ :wq
+ 
+ https://company.slack.com/apps(step-1)
+		[manage](step-2)
+		    |
+		   Goto manage
+ 
+ [customeintegrations](step-3)
+	
+		[incoming webhooks](Step-4)
+
+ [add a configuration] (step-5)
+ 
+ [choose channel] (step-6)
+
+ [  prometheus course ] (Step-7)
+    |
+    |
+ webhook url: https://hooks.slack... (step-8)
+	      --------------------
+		|
+		copy this link paste this link to alertmanger.yml file
+						  _______________
+		
+		vi /etc/alertmanager/alertmanager.yml {enter}
+		
+		api_url: <paste the link> (Step-9)
+
+		:wq
+		
+		systemctl restart alertmanager (Step-10)
+		systemctl status alertmanager  (Step-11)
+		
+
+ Step-12
+ -------
+  -> vi /etc/prometheus/prometheus.yml
+	
+	alerting:
+	  altermanagers:
+	  - static_configs:
+            - targets:
+              - localhost: 9093
+		---------
+ :wq
+
+ Step - 13: systemctl restart prometheus
+	    systemctl status prometheus
+
+  ---------------------------------------------------------
+  127.0.0.1:9093
+ ----------------------------------------------------------- 
+  -> open node terminal -> yes >/dev/null &
+	  (OL7)
+
+  -> see the alerts ->prometheus_server -> 127.0.0.1:9093 
+
+  -> Go to OL7 -> kill a process
+ 
+    ps 
+    PID ... yes
+
+    kill -9 <PIDofyes>
+   
+  
+  ---------------------------------------------------------------------------------------
+  Service discovery
+  ------------------
+  -> automatically monitor your services
+  
+  
+ 
+  download - exporter
+		
+  configure - exporter -> exporterName.yml (ex: alertmaner.yml cloudwatch.yml ....)
+   |
+  create a unit(or)service 
+  ---------------------------------//
+   |
+  update this exporter details ->prometheus config (prometheus.yml	
+   				 -----------------
+
+			
+  -----------------------------
+	
+  download & install cloud watch exporter
+  configure
+  create unit /service 
+  ...
+  ...
+  ---------------------//6th script.sh
+
+
+  aws account
+  |
+  |-> create a new user ->AccesskeyID;secreat keyID
+
+ vi /etc/prometheus/prometheus.yml{enter}
+ 
+
+  - job_name: cloud_watch exporter
+	...
+	...
+		['localhost:9106']
+
+ :wq
+
+ vi /etc/cloudwatchexporter/cloudwatchexporter.yml {enter}
+ 
+ ---
+ region:
+  ..
+ # keep the default 
+ ----
+ systemctl start cloudwatch_exporter
+ systemctl start prometheus
+ 
+ Goto prometheus UI ->status ->targets 
+				aws... -> /metrics ->aws_...
+ 
+
+ --------------------------------------------------------------------------------------------
+ grafana provisioning
+
+ dashboard/file1.yml
+ datasource/file2.yml
+ .........................
+
+
+ Labsetup
+ ----------
+
+ cd scripts 
+ # installing grafana  
+ ./3-install-grafana.sh {Enter} 
+ 
+ ls /etc/grafana/provising/datasource
+ 
+
+ cd ..
+ cd grafana (or) cd prometheus_course/grafana
+
+ cp prometheus_course/grafana/datasource-prometheus.yml /etc/grafana/provisioning/datasources/{Enter}
+ 
+ cp prometheus_course/grafana/dashboard.yml /etc/grafana/provisioning/dashboards/  {Enter}
+
+ ls prometheus_course/grafana/node-dashbord.json 
+ 
+
+ mkdir -p /var/lib/grafana/dashboards
+
+ cp prometheus_course/grafana/node-dashbord.json /var/lib/grafana/dashboards
+
+ systemctl restart grafana-server.service
+ 
+ open a browswer -> 127.0.0.1:3000
+       node-dashbord.json 
+	[  | ]    [ |  ]
+           |	    |
+         memory    CPU 
+
+	
+
+ TLS
+ ----
+ -> prometheus supports TLS ->HTTP endpoints
+
+ =============================================================================================
+ Storage
+ --------
+ default on-disk / remote storage
+
+ disk storage(or) local storage - a localtime series db-in prometheus 
+ remote storage  : remote system std format.
+
+ sample - grouped in to block - 2Hrs
+
+ sample ->D1
+ sample ->D2
+
+ dir1		dir2
+ ----		----
+ 2Hr data	2Hr data
+ chunks:00101	...
+    
+
+ prometheus   metric
+   |           |
+ user   - plain data
+ ---  
+ FS - meta data 
+ ----
+ HD - raw data
+   		
+ every directory -> index file(index) and meta datafile (meta.json)
+
+ cpu_metric{instance='10.0.2.4:9100',job='..'}
+ -------------------------------------------------------------------------------------------------
